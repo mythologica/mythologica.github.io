@@ -5,38 +5,33 @@
 ```shell
 pnpm create tauri-app
 
-? Project name (tauri) > my-tauri 
-
-? Choose your package manager >
-  cargo
-> pnpm
+? Project name (tauri) > vue-tauri 
+? Choose which language to use for your frontend ›
+❯ TypeScript / JavaScript  (pnpm, yarn, npm)
+  Rust 
+? Choose your package manager ›
+❯ pnpm
   yarn
   npm
-
 ? Choose your UI template ›
-  vanilla
-  vanilla-ts
-  vue
-  vue-ts
-  svelte
-  svelte-ts
-  react
-  react-ts
-  solid
-  solid-ts
-  next
-  next-ts
-  preact
-  preact-ts
-  angular
-  clojurescript
-  svelte-kit
-❯ svelte-kit-ts
+  Vanilla
+  Vue 
+❯ Svelte  (https://svelte.dev/)
+  React 
+  Solid 
+  Angular 
+? Choose your UI flavor ›
+❯ TypeScript
+  JavaScript
+
+Template created! To get started run:
+  cd my-app
+  pnpm install
+  pnpm tauri dev
 ```
 
 ### run 
-
-```
+```shell
 $ cd my-tauri && pnpm install
 
 $ pnpm tauri dev
