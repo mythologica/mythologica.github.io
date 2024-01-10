@@ -43,7 +43,7 @@ const getDuplicateValueIndex = (_array, _columns) => {
         }
 
         for(let k in dupIdx) {
-            rtnIndex.push(k)
+            rtnIndex.push(Number(k))
         }
     }
     return rtnIndex.sort((a,b)=>a-b)
