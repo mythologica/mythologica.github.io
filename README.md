@@ -12,5 +12,6 @@
 5. yml [link](https://goateedev.tistory.com/175)
 6. auto reload [link](https://easybrother0103.tistory.com/62)
 
-
+## javascript 
+1. 중복된 아이템 찾기(duplicate item in array) [link](javascript/array/duplicate_array.md)
 
