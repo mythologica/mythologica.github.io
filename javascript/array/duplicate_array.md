@@ -16,23 +16,26 @@ let data = [
 ];
 
 const getDuplicateValueIndex = (_array, _columns) => {
-    let dumiArray1 = [..._array].map((value,index) => ({...value,ROW_NUM:index}))
-    const mergeValues = (item, columns) => {
-        let dupKey = [];
-        columns.forEach((column) => {
-            dupKey.push(item[column])
-        })
-        return dupKey.join('<>')
-    }
     let rtnIndex = [];
-    while(dumiArray1.length) {
-        let checkItem = dumiArray1.shift();
-        dumiArray1.forEach((item)=>{
-            if( mergeValues( checkItem, _columns) === mergeValues( item , _columns) ) {
-                rtnIndex.push(checkItem.ROW_NUM)
-                rtnIndex.push(item.ROW_NUM)
-            }
-        })
+    if( _columns && _columns.length ) {
+        let dumiArray1 = [..._array||[]].map((value,index) => ({...value,ROW_NUM:index}))
+        const mergeValues = (item, columns) => {
+            let dupKey = [];
+            columns.forEach((column) => {
+                dupKey.push(item[column])
+            })
+            return dupKey.join('<>')
+        }
+        
+        while(dumiArray1.length) {
+            let checkItem = dumiArray1.shift();
+            dumiArray1.forEach((item)=>{
+                if( mergeValues( checkItem, _columns) === mergeValues( item , _columns) ) {
+                    rtnIndex.push(checkItem.ROW_NUM)
+                    rtnIndex.push(item.ROW_NUM)
+                }
+            })
+        }
     }
     return rtnIndex
 }
@@ -46,8 +49,10 @@ const getDuplicateValueItem = (_array, _columns) => {
     return rtn
 }
 
-console.log('getDuplicateValueIndex', getDuplicateValueIndex(data, ['a', 'b']))
+console.log('getDuplicateValueItem', getDuplicateValueItem(data, null))
+console.log('getDuplicateValueItem', getDuplicateValueItem(null, ['a', 'b']))
 console.log('getDuplicateValueItem', getDuplicateValueItem(data, ['a', 'b']))
+console.log('getDuplicateValueIndex', getDuplicateValueIndex(data, ['a', 'b']))
 console.log('data', data)
 ```
 
