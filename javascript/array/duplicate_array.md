@@ -1,4 +1,6 @@
 # duplicate value in array 
+1. 배열의 키중 a, b의 값이 중복된 것을 뽑아서 반환하는 메소드 입니다.
+
 
 ```javascript
 
