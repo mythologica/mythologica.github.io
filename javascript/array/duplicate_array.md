@@ -62,10 +62,13 @@ const getDuplicateValueItem = (_array, _columns) => {
 
 const getDuplicateValueRows = ( _array , _columns , _primaryKeys ) => {
     let rtn = {
- primaryKeys:[],
-        indexs:[getDuplicateValue(_array,_columns)]
+        primaryKeys:[],
+        indexs:[],
         rows:[],
     }
+
+    rtn.indexs = getDuplicateValueIndex(_array,_columns)
+
     if(_primaryKeys && _primaryKeys.length ) {
         rtn.indexs.forEach((rowIndex)=>{
             let row = {..._array[rowIndex]}
@@ -75,14 +78,11 @@ const getDuplicateValueRows = ( _array , _columns , _primaryKeys ) => {
                 rowPk[pk]= row[pk]
             })
             rtn.primaryKeys.push({...rowPk})
-
         })
     } else {
-
         rtn.indexs.forEach((rowIndex)=>{
             let row = {..._array[rowIndex]}
             rtn.rows.push(row)
-           
         })
     }
     return rtn;   
