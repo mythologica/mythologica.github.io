@@ -1,12 +1,7 @@
 # date tools
 
 ```js
-const commUtils = {};
-
-
-
-
-commUtils.convertDate = function (_dateString, _sourceFormat, _targetFormat) {
+const convertDate = function (_dateString, _sourceFormat, _targetFormat) {
     const MONTH_F_NAMES = ['january', 'febuary', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'];
     const MONTH_S_NAMES = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
 
@@ -89,6 +84,6 @@ commUtils.convertDate = function (_dateString, _sourceFormat, _targetFormat) {
     return result
 }
 
-const rs = commUtils.convertDate('6/17/2024', 'm/d/yyyy', 'yyyymmdd')
+const rs = convertDate('6/17/2024', 'm/d/yyyy', 'yyyymmdd')
 console.log(rs)
 ```
