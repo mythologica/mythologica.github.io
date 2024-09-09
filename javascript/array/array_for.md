@@ -15,4 +15,11 @@ for( const [idx,val] of list.entries() ) {
   console.log('index',idx);
   console.log('value',val);
 }
+
+const list2 = ['a','b','c','d'];
+
+for( const [idx,val] of Object.entries(list2) ){
+  console.log('index',idx);
+  console.log('value',val);
+}
 ```
