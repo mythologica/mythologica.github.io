@@ -1,5 +1,4 @@
-
->>> google chat을 홈페이지에 추가하는 방법을 알려줘. chat space를 생성 후 user들을 추가해서 chat창을 팝업으로 띄울수 있게 해줘.
+> google chat을 홈페이지에 추가하는 방법을 알려줘. chat space를 생성 후 user들을 추가해서 chat창을 팝업으로 띄울수 있게 해줘.
 구글 챗(Google Chat)을 홈페이지에 추가하려면 다음 단계를 따라하세요:
 
 **1. Google Workspace 계정 설정**
@@ -72,7 +71,7 @@ function openChatSpace() {
 이 단계를 따라하면 Google Chat을 홈페이지에 추가하고 Chat Space를 생성하여 사용자들을 추가한 후, 팝업 창으로 띄울 수 있습니
 다.
 
->>> 다이얼로그 창으로 띄울려면 어떻게 해?
+> 다이얼로그 창으로 띄울려면 어떻게 해?
 다이얼로그 창으로 구글 챗(Google Chat)을 띄우기 위해서는 다음 단계를 따라하세요:
 
 **1. HTML 다이얼로그 태그 추가**
