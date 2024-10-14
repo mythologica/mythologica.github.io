@@ -132,3 +132,55 @@ function closeChatDialog() {
 </script>
 ```
 이렇게 하면 다이얼로그 창을 닫을 수 있습니다.
+
+> mave lib
+
+```xml
+<dependencies>
+  <!-- ... existing dependencies ... -->
+  <dependency>
+    <groupId>com.google.apis</groupId>
+    <artifactId>google-api-services-chat</artifactId>
+    <version>v1-rev20230905-2.0.0</version>
+  </dependency>
+  <dependency>
+    <groupId>com.google.auth</groupId>
+    <artifactId>google-auth-library-oauth2-http</artifactId>
+    <version>1.19.0</version>
+  </dependency>
+  <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>2.10.1</version>
+  </dependency>
+</dependencies>
+```
+ 
+```java
+Maven: com.google.api-client:google-api-client:2.2.0
+Maven: com.google.apis:google-api-services-chat:v1-rev20230905-2.0.0
+Maven: com.google.auth:google-auth-library-credentials:1.19.0
+Maven: com.google.auth:google-auth-library-oauth2-http:1.19.0
+Maven: com.google.auto.value:auto-value-annotations:1.10.1
+Maven: com.google.code.findbugs:jsr305:3.0.2
+Maven: com.google.code.gson:gson:2.10.1
+Maven: com.google.errorprone:error_prone_annotations:2.16
+Maven: com.google.guava:failureaccess:1.0.1
+Maven: com.google.guava:guava:32.0.0-android
+Maven: com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava
+Maven: com.google.http-client:google-http-client:1.42.3
+Maven: com.google.http-client:google-http-client-apache-v2:1.42.3
+Maven: com.google.http-client:google-http-client-gson:1.42.3
+Maven: com.google.j2objc:j2objc-annotations:1.3
+Maven: com.google.oauth-client:google-oauth-client:1.34.1
+Maven: commons-codec:commons-codec:1.15
+Maven: commons-logging:commons-logging:1.2
+Maven: io.grpc:grpc-context:1.27.2
+Maven: io.opencensus:opencensus-api:0.31.1
+Maven: io.opencensus:opencensus-contrib-http-util:0.31.1
+Maven: junit:junit:4.11
+Maven: org.apache.httpcomponents:httpclient:4.5.14
+Maven: org.apache.httpcomponents:httpcore:4.4.16
+Maven: org.checkerframework:checker-qual:3.33.0
+Maven: org.hamcrest:hamcrest-core:1.3
+```
