@@ -184,19 +184,3 @@ Maven: org.apache.httpcomponents:httpcore:4.4.16
 Maven: org.checkerframework:checker-qual:3.33.0
 Maven: org.hamcrest:hamcrest-core:1.3
 ```
-
-```
-ლ( ╹ ◡ ╹ ლ) 
-
-	(ღˇᴗˇ)｡o♡ 
-
-ㅍ！！(゜ロ゜ノ)ノㅓㅇ
-
- (´▽`ʃƪ)♡ 
-
-_( :0 」 )_ 
-
-	|ω・｀) 
-
-ㅇ ㅏ임 호옴~~~~~~ - ̗̀ෆ⎛˶'ᵕ'˶ ⎞ෆ ̖́-     
-```
