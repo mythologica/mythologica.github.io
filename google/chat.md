@@ -1,5 +1,9 @@
 # google 인증
 
+- 인증설정 [link](https://developers.google.com/workspace/guides/auth-overview?hl=ko)
+
+- 서비스 계정에 도메인 전체 권한 위임 [link](https://developers.google.com/identity/protocols/oauth2/service-account?hl=ko#delegatingauthority)
+
 - 사용자로 인증 [link](https://developers.google.com/workspace/chat/authenticate-authorize-chat-user?hl=ko)
 
 - 서버 간 애플리케이션에 OAuth 2.0 사용 [link](https://developers.google.com/identity/protocols/oauth2/service-account?hl=ko#creatinganaccount)
