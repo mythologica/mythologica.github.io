@@ -16,5 +16,5 @@
 
 - google api java client samples [link](https://github.com/google/google-api-java-client-samples)
 
-
+- 구글인증하는 방법 [link](https://cloud.google.com/docs/authentication/?hl=ko)
 
