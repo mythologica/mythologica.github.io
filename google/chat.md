@@ -22,3 +22,4 @@
 
 - 구글인증하는 방법 [link](https://cloud.google.com/docs/authentication/?hl=ko)
 
+- google oauth2 + spring boot [link](https://dev-annals.tistory.com/60)
