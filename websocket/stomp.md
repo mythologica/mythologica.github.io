@@ -126,3 +126,82 @@ public class ChatServer {
 3. 여러 브라우저 또는 탭에서 페이지를 열고 메시지를 주고받을 수 있습니다.
 
 이 간단한 예제는 기본적인 채팅 기능을 제공하며, 필요에 따라 추가적으로 사용자 관리, 메시지 저장, UI 개선 등을 해볼 수 있습니다.
+
+
+WebSocket 서버를 실행하기 위한 Java Main 클래스를 추가하겠습니다. javax.websocket-api는 일반적으로 Java EE 환경에서 사용되며, Embedded WebSocket 서버를 구현할 수 있습니다. 자바의 `javax.websocket.server.ServerContainer`를 사용하여 서버를 배포할 수 있습니다.
+
+여기서는 `org.glassfish.tyrus` 라이브러리를 사용해 Embedded WebSocket 서버를 간단히 구현하겠습니다. Maven의 `pom.xml`에 해당 라이브러리를 추가해야 합니다.
+
+### Maven 의존성 추가
+`pom.xml`에 Tyrus 의존성을 추가합니다.
+
+```xml
+<dependencies>
+    <dependency>
+        <groupId>javax.websocket</groupId>
+        <artifactId>javax.websocket-api</artifactId>
+        <version>1.1</version>
+    </dependency>
+    <dependency>
+        <groupId>org.glassfish.tyrus</groupId>
+        <artifactId>tyrus-standalone-client</artifactId>
+        <version>1.17</version>
+    </dependency>
+</dependencies>
+```
+
+### Main 클래스 구현
+이제 WebSocket 서버를 실행하는 메인 클래스를 작성합니다.
+
+```java
+import org.glassfish.tyrus.server.Server;
+
+public class ChatServerMain {
+    public static void main(String[] args) {
+        // WebSocket 서버 설정
+        Server server = new Server("localhost", 8080, "/", ChatServer.class);
+
+        try {
+            // 서버 시작
+            server.start();
+            System.out.println("Chat server started on ws://localhost:8080/chat");
+            // 사용자 입력 대기 (서버가 계속 실행되도록)
+            System.in.read();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            // 서버 종료
+            server.stop();
+            System.out.println("Chat server stopped.");
+        }
+    }
+}
+```
+
+### 프로젝트 구조
+최종적으로 프로젝트 구조는 다음과 같아야 합니다:
+
+```
+/YourProject
+    ├── src
+    │   ├── main
+    │   │   ├── java
+    │   │   │   ├── ChatServer.java
+    │   │   │   └── ChatServerMain.java
+    │   │   └── resources
+    ├── pom.xml
+```
+
+### 실행 방법
+1. Maven을 사용하여 프로젝트를 빌드합니다.
+2. 메인 클래스를 실행합니다 (`ChatServerMain`).
+3. 이제 `http://localhost:8080/chat`에서 WebSocket 서버가 실행 중입니다.
+4. 앞서 만든 HTML 파일을 브라우저에서 열면 이제 채팅 기능을 사용할 수 있습니다.
+
+이 설정을 통해 Java WebSocket 채팅 서버를 성공적으로 구축할 수 있습니다. 필요한 경우 추가적인 예외 처리나 기능을 구현하여 개선할 수 있습니다.
+
+
+
+
+
+
