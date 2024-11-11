@@ -202,6 +202,185 @@ public class ChatServerMain {
 
 
 
+WebSocket을 통해 STOMP 프로토콜을 활용하여 특정 토픽에 대한 구독 및 메시지 전송 기능을 구현하기 위해, Java의 WebSocket 서버에서 구독 및 게시 기능을 추가하는 방법에 대해 설명하겠습니다.
 
+이제 우리는 클라이언트가 특정 "토픽"에 메시지를 publish하고 구독할 수 있도록 백엔드 로직을 구성할 것입니다.
+
+### 1. ChatServer.java 수정
+
+각 클라이언트의 구독 정보를 관리하며 메시지 게시가 가능하도록 코드를 업데이트 합니다.
+
+```java
+import javax.websocket.*;
+import javax.websocket.server.ServerEndpoint;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
+
+@ServerEndpoint("/chat")
+public class ChatServer {
+
+    private Session session;
+    private static Set<ChatServer> chatServers = new CopyOnWriteArraySet<>();
+    private static Map<String, Set<ChatServer>> topicSubscriptions = new HashMap<>();
+
+    @OnOpen
+    public void onOpen(Session session) {
+        this.session = session;
+        chatServers.add(this);
+        System.out.println("New connection: " + session.getId());
+    }
+
+    @OnMessage
+    public void onMessage(String message) {
+        // JSON 메시지를 파싱하여 메서드 호출
+        handleMessage(message);
+    }
+
+    @OnClose
+    public void onClose(Session session) {
+        chatServers.remove(this);
+        unsubscribeFromAllTopics();
+        System.out.println("Connection closed: " + session.getId());
+    }
+
+    @OnError
+    public void onError(Session session, Throwable throwable) {
+        throwable.printStackTrace();
+    }
+
+    private void handleMessage(String message) {
+        // 메시지를 JSON으로 파싱
+        // 여기서는 단순화를 위해 메시지가 "type" 필드를 기반으로 다를 수 있다고 가정
+        // { "type": "SUBSCRIBE", "topic": "/topic/myTopic" }
+        // { "type": "SEND", "topic": "/topic/myTopic", "content": "Hello!" }
+
+        try {
+            JSONObject json = new JSONObject(message);
+            String type = json.getString("type");
+            if ("SUBSCRIBE".equalsIgnoreCase(type)) {
+                String topic = json.getString("topic");
+                subscribeToTopic(topic);
+            } else if ("SEND".equalsIgnoreCase(type)) {
+                String topic = json.getString("topic");
+                String content = json.getString("content");
+                sendMessageToTopic(topic, content);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // 토픽에 구독
+    private void subscribeToTopic(String topic) {
+        topicSubscriptions.putIfAbsent(topic, new CopyOnWriteArraySet<>());
+        topicSubscriptions.get(topic).add(this);
+        System.out.println("Subscribed to topic: " + topic);
+    }
+
+    // 특정 토픽에 메시지를 발송
+    private void sendMessageToTopic(String topic, String message) {
+        Set<ChatServer> subscribers = topicSubscriptions.get(topic);
+        if (subscribers != null) {
+            for (ChatServer subscriber : subscribers) {
+                try {
+                    if (subscriber.session.isOpen()) {
+                        subscriber.session.getBasicRemote().sendText(message);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    // 모든 구독을 취소
+    private void unsubscribeFromAllTopics() {
+        for (String topic : topicSubscriptions.keySet()) {
+            topicSubscriptions.get(topic).remove(this);
+        }
+    }
+}
+```
+
+### 2. 클라이언트 측 (HTML + JavaScript)
+
+클라이언트에서 토픽에 구독하고 메시지를 전송할 수 있도록 HTML 파일을 작성합니다. 클라이언트는 STOMP 프로토콜을 따라 JSON 형식의 메시지를 처리해야 합니다.
+
+#### HTML 파일 수정
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Application</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+</head>
+<body>
+    <h1>Chat Application</h1>
+    <div id="chat"></div>
+    <input type="text" id="topic" placeholder="Enter topic">
+    <input type="text" id="message" placeholder="Enter your message">
+    <button onclick="subscribe()">Subscribe</button>
+    <button onclick="sendMessage()">Send</button>
+
+    <script>
+        var stompClient = null;
+
+        function connect() {
+            var socket = new WebSocket('ws://localhost:8080/chat');
+            stompClient = Stomp.over(socket);
+            stompClient.connect({}, function (frame) {
+                console.log('Connected: ' + frame);
+            });
+        }
+
+        function subscribe() {
+            var topic = document.getElementById("topic").value;
+            stompClient.send("/topic/subscribe", {}, JSON.stringify({ "type": "SUBSCRIBE", "topic": topic }));
+            stompClient.subscribe(topic, function (message) {
+                displayMessage(message.body);
+            });
+        }
+
+        function sendMessage() {
+            var topic = document.getElementById("topic").value;
+            var messageContent = document.getElementById("message").value;
+
+            stompClient.send("/topic/send", {}, JSON.stringify({
+                "type": "SEND",
+                "topic": topic,
+                "content": messageContent
+            }));
+            document.getElementById("message").value = '';
+        }
+
+        function displayMessage(message) {
+            var chatDiv = document.getElementById("chat");
+            chatDiv.innerHTML += '<div>' + message + '</div>';
+        }
+
+        window.onload = connect;
+    </script>
+</body>
+</html>
+```
+
+### 최종적으로
+
+이제 이 구현을 통해 클라이언트는 특정 토픽에 구독할 수 있으며, 해당 토픽으로 메시지를 보낼 수 있습니다. 각 클라이언트는 각각의 토픽에 대해 구독을 할 수 있으며, 해당 토픽으로 발송된 메시지는 구독한 모든 클라이언트에게 전달됩니다.
+
+### 실행 방법 요약
+
+1. Java WebSocket 서버를 실행 (`ChatServerMain` 클래스).
+2. 웹 페이지를 열고, 주제(topic)를 입력한 후 `Subscribe` 버튼을 클릭하여 구독합니다.
+3. 메시지를 입력하고 전송하여 해당 주제에 메시지를 보냅니다.
+4. 다른 클라이언트 동일한 주제로 구독하여 메시지를 수신할 수 있습니다.
+
+이러한 방식으로 여러 주제를 지원하는 기본적인 채팅 시스템을 완성할 수 있습니다. 필요에 따라 개선할 수 있는 거의 무궁무진한 방안이 있으니 요구 사항에 맞게 확장하십시오.
 
 
