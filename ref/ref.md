@@ -10,4 +10,4 @@
 
 - stomp & websocket [link](https://ppaksang.tistory.com/18)
 
-- [link](https://blog.leaphop.co.kr/blogs/56/WebSocket_통신에_대해_알아보기)
+- WebSocket 통신에 대해 알아보기 [link](https://blog.leaphop.co.kr/blogs/56/WebSocket_통신에_대해_알아보기)
