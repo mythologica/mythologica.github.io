@@ -486,3 +486,210 @@ WebSocket 연결이 끊겼을 때 자동으로 재연결하는 로직을 추가�
 3. **socket.onclose**: WebSocket의 `onclose` 이벤트를 사용하여 소켓이 닫히면 재연결을 시도합니다. 
 
 이러한 방식으로 클라이언트 애플리케이션은 WebSocket 연결이 끊어졌을 때 자동으로 재연결을 시도합니다. 재연결 로직이 실패하면 일정 시간 후에 다시 시도하며, 서버에 연결될 때까지 계속 시도합니다. 이로 인해 불안정한 네트워크 환경에서도 사용자가 원활하게 채팅을 이용할 수 있게 됩니다.
+
+
+
+
+
+
+WebSocket을 통한 STOMP 메시지 형식에 맞춰 클라이언트에게 응답을 반환하도록 서버 측 코드를 수정하겠습니다. STOMP 프레임 형식에 따르면, 메시지를 JSON 형태로 사용해야 하며, 메시지 타입과 관련된 세부 정보를 추가해야 합니다.
+
+특히, 클라이언트가 구독할 때와 메시지를 보낼 때 서버로부터 더 정교한 응답을 받도록 설정할 수 있습니다. 아래에서 이를 어떻게 구현할 수 있는지에 대한 예제를 제공하겠습니다.
+
+### 1. ChatServer.java 수정
+
+이제 `ChatServer` 클래스를 수정하여 메시지 응답이 STOMP 프레임 형식에 맞추어지도록 합니다.
+
+```java
+import javax.websocket.*;
+import javax.websocket.server.ServerEndpoint;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
+
+@ServerEndpoint("/chat")
+public class ChatServer {
+
+    private Session session;
+    private static Set<ChatServer> chatServers = new CopyOnWriteArraySet<>();
+    private static Map<String, Set<ChatServer>> topicSubscriptions = new HashMap<>();
+
+    @OnOpen
+    public void onOpen(Session session) {
+        this.session = session;
+        chatServers.add(this);
+        System.out.println("New connection: " + session.getId());
+    }
+
+    @OnMessage
+    public void onMessage(String message) {
+        handleMessage(message);
+    }
+
+    @OnClose
+    public void onClose(Session session) {
+        chatServers.remove(this);
+        unsubscribeFromAllTopics();
+        System.out.println("Connection closed: " + session.getId());
+    }
+
+    @OnError
+    public void onError(Session session, Throwable throwable) {
+        throwable.printStackTrace();
+    }
+
+    private void handleMessage(String message) {
+        try {
+            JSONObject json = new JSONObject(message);
+            String type = json.getString("type");
+            if ("SUBSCRIBE".equalsIgnoreCase(type)) {
+                String topic = json.getString("topic");
+                subscribeToTopic(topic);
+                sendSubscriptionConfirmation(topic);
+            } else if ("SEND".equalsIgnoreCase(type)) {
+                String topic = json.getString("topic");
+                String content = json.getString("content");
+                sendMessageToTopic(topic, content);
+            } 
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void subscribeToTopic(String topic) {
+        topicSubscriptions.putIfAbsent(topic, new CopyOnWriteArraySet<>());
+        topicSubscriptions.get(topic).add(this);
+        System.out.println("Subscribed to topic: " + topic);
+    }
+
+    private void sendSubscriptionConfirmation(String topic) {
+        try {
+            JSONObject response = new JSONObject();
+            response.put("type", "SUBSCRIBED");
+            response.put("topic", topic);
+            response.put("message", "Successfully subscribed to the topic.");
+
+            String frame = "SUBSCRIBE\n" +
+                           "destination: " + topic + "\n" +
+                           "\n" + 
+                           response.toString() + "\n" + 
+                           "\u0000"; // STOMP frame end
+
+            this.session.getBasicRemote().sendText(frame);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void sendMessageToTopic(String topic, String message) {
+        Set<ChatServer> subscribers = topicSubscriptions.get(topic);
+        if (subscribers != null) {
+            for (ChatServer subscriber : subscribers) {
+                try {
+                    if (subscriber.session.isOpen()) {
+                        String frame = "MESSAGE\n" +
+                                       "destination: " + topic + "\n" +
+                                       "\n" + 
+                                       message + "\n" + 
+                                       "\u0000"; // STOMP frame end
+                        subscriber.session.getBasicRemote().sendText(frame);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private void unsubscribeFromAllTopics() {
+        for (String topic : topicSubscriptions.keySet()) {
+            topicSubscriptions.get(topic).remove(this);
+        }
+    }
+}
+```
+
+### 설명
+
+1. **sendSubscriptionConfirmation 메서드**: 클라이언트가 구독을 요청하면, 이 메서드는 해당 구독이 성공적이었다는 응답을 클라이언트로 전송합니다. 이 응답은 STOMP 프레임의 `SUBSCRIBE` 형식에 맞춰 작성됩니다.
+
+2. **sendMessageToTopic 메서드**: 특정 토픽으로 메시지를 보낼 때 사용하는 메서드입니다. 메시지가 STOMP 프레임 형식의 `MESSAGE`로 작성되어 구독한 모든 클라이언트에게 전달됩니다.
+
+3. **JSON 처리**: 클라이언트가 보낸 메시지는 JSON 형식으로 파싱되어 그에 따라 타입을 처리합니다. JSON 파싱이 실패할 경우 예외 처리도 포함되어 있습니다.
+
+### 3. 클라이언트 측 변경
+
+서버에서 보내는 `SUBSCRIBED` 메시지와 `MESSAGE` 메시지를 올바르게 처리하기 위해 클라이언트 측에서도 수신 처리 코드가 필요합니다.
+
+#### HTML 파일 수정
+
+```html
+<script>
+    var stompClient = null;
+    var socket = null;
+    var retryInterval = 5000; // 재연결 시도 간격 (밀리초)
+
+    function connect() {
+        socket = new WebSocket('ws://localhost:8080/chat');
+        stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, function (frame) {
+            console.log('Connected: ' + frame);
+        }, function (error) {
+            console.error('Error connecting: ' + error);
+            handleReconnect(); // 에러 발생 시 재연결 시도
+        });
+
+        socket.onclose = function() {
+            console.warn('Socket closed. Attempting reconnect...');
+            handleReconnect(); // 소켓이 닫히면 재연결 시도
+        };
+    }
+
+    function handleReconnect() {
+        setTimeout(function() {
+            console.log('Trying to reconnect...');
+            connect();
+        }, retryInterval);
+    }
+
+    function subscribe() {
+        var topic = document.getElementById("topic").value;
+        stompClient.send("/topic/subscribe", {}, JSON.stringify({
+            "type": "SUBSCRIBE",
+            "topic": topic
+        }));
+        
+        stompClient.subscribe(topic, function (message) {
+            displayMessage(message.body);
+        });
+    }
+
+    function sendMessage() {
+        var topic = document.getElementById("topic").value;
+        var messageContent = document.getElementById("message").value;
+
+        stompClient.send("/topic/send", {}, JSON.stringify({
+            "type": "SEND",
+            "topic": topic,
+            "content": messageContent
+        }));
+        document.getElementById("message").value = '';
+    }
+
+    function displayMessage(message) {
+        var chatDiv = document.getElementById("chat");
+        chatDiv.innerHTML += '<div>' + message + '</div>';
+    }
+
+    window.onload = connect;
+</script>
+```
+
+이 설정을 통해 이제 채팅 서버는 STOMP 프레임의 형식에 맞춰 구독과 메시지 전송을 처리하고 응답합니다. 이러한 설정을 통해 클라이언트와 서버 간의 통신이 더욱 원활하게 이루어질 수 있습니다. 
+
+추가적으로 필요한 기능(예: 사용자 인증, 메시지 히스토리 등)을 구현하여 애플리케이션을 확장할 수 있습니다.
