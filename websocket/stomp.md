@@ -384,3 +384,105 @@ public class ChatServer {
 이러한 방식으로 여러 주제를 지원하는 기본적인 채팅 시스템을 완성할 수 있습니다. 필요에 따라 개선할 수 있는 거의 무궁무진한 방안이 있으니 요구 사항에 맞게 확장하십시오.
 
 
+
+
+WebSocket 연결이 끊겼을 때 자동으로 재연결하는 로직을 추가하는 것은 안정적인 채팅 애플리케이션을 만드는 데 매우 중요한 단계입니다. 아래에서는 클라이언트 측에서 재연결 로직을 구현하는 방법을 설명하겠습니다.
+
+### 1. 서버 측 변경
+
+서버 측에서는 특별한 변경이 필요하지 않습니다. 서버는 여전히 WebSocket 요청을 수신하고 처리합니다. 하지만 여전히 정상적인 운영이 이루어지고 있다고 가정할 수 있습니다.
+
+### 2. 클라이언트 측 변경
+
+클라이언트 측에서는 WebSocket 연결이 끊어졌을 때 재연결 시도를 하도록 코드를 추가해야 합니다. 아래는 JavaScript에서 자동으로 재연결을 시도하는 절차입니다.
+
+#### HTML 파일 수정
+
+다음은 HTML과 JavaScript 코드에 재연결 로직을 추가한 예입니다.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Application</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+</head>
+<body>
+    <h1>Chat Application</h1>
+    <div id="chat"></div>
+    <input type="text" id="topic" placeholder="Enter topic">
+    <input type="text" id="message" placeholder="Enter your message">
+    <button onclick="subscribe()">Subscribe</button>
+    <button onclick="sendMessage()">Send</button>
+
+    <script>
+        var stompClient = null;
+        var socket = null;
+        var retryInterval = 5000; // 재연결 시도 간격 (밀리초)
+
+        function connect() {
+            socket = new WebSocket('ws://localhost:8080/chat');
+            stompClient = Stomp.over(socket);
+
+            stompClient.connect({}, function (frame) {
+                console.log('Connected: ' + frame);
+            }, function (error) {
+                console.error('Error connecting: ' + error);
+                handleReconnect(); // 에러가 발생할 경우 재연결 시도
+            });
+
+            socket.onclose = function() {
+                console.warn('Socket closed. Attempting reconnect...');
+                handleReconnect(); // 소켓이 닫히면 재연결 시도
+            };
+        }
+
+        function handleReconnect() {
+            setTimeout(function() {
+                console.log('Trying to reconnect...');
+                connect();
+            }, retryInterval);
+        }
+
+        function subscribe() {
+            var topic = document.getElementById("topic").value;
+            stompClient.send("/topic/subscribe", {}, JSON.stringify({ "type": "SUBSCRIBE", "topic": topic }));
+            stompClient.subscribe(topic, function (message) {
+                displayMessage(message.body);
+            });
+        }
+
+        function sendMessage() {
+            var topic = document.getElementById("topic").value;
+            var messageContent = document.getElementById("message").value;
+
+            stompClient.send("/topic/send", {}, JSON.stringify({
+                "type": "SEND",
+                "topic": topic,
+                "content": messageContent
+            }));
+            document.getElementById("message").value = '';
+        }
+
+        function displayMessage(message) {
+            var chatDiv = document.getElementById("chat");
+            chatDiv.innerHTML += '<div>' + message + '</div>';
+        }
+
+        window.onload = connect;
+    </script>
+</body>
+</html>
+```
+
+### 설명
+
+1. **connect()**: WebSocket을 새로 생성하고 연결을 시도합니다. STOMP 클라이언트를 통해 연결을 설정합니다.
+
+2. **handleReconnect()**: 연결 끊김이 감지될 경우, 설정된 간격 후에 `connect()`를 호출하여 WebSocket 서버에 재연결을 시도합니다.
+
+3. **socket.onclose**: WebSocket의 `onclose` 이벤트를 사용하여 소켓이 닫히면 재연결을 시도합니다. 
+
+이러한 방식으로 클라이언트 애플리케이션은 WebSocket 연결이 끊어졌을 때 자동으로 재연결을 시도합니다. 재연결 로직이 실패하면 일정 시간 후에 다시 시도하며, 서버에 연결될 때까지 계속 시도합니다. 이로 인해 불안정한 네트워크 환경에서도 사용자가 원활하게 채팅을 이용할 수 있게 됩니다.
