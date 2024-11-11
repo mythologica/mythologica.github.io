@@ -11,3 +11,5 @@
 - stomp & websocket [link](https://ppaksang.tistory.com/18)
 
 - WebSocket 통신에 대해 알아보기 [link](https://blog.leaphop.co.kr/blogs/56/WebSocket_통신에_대해_알아보기)
+
+- Stomp.js 를 이용한 WebSocket 연동 [link](https://medium.com/@woal9844/stomp-js-%EB%A5%BC-%EC%9D%B4%EC%9A%A9%ED%95%9C-websocket-%EC%97%B0%EB%8F%99-c9f0ef6ab540)
