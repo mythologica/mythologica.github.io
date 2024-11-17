@@ -29,4 +29,6 @@
 # tailwind 
 - chat [lin](https://www.creative-tim.com/twcomponents/component/chat)
 
+# sqlite
+- sqlite [link](https://blog.naver.com/tokimdh77/220561836945)
   
