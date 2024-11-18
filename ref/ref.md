@@ -21,6 +21,8 @@
 - spring boot websocket 구현 [link](https://velog.io/@prm1247/Spring-Boot-WebSocket-%EA%B5%AC%ED%98%84%ED%95%98%EA%B8%B0)
 
 - spring websocket [link](https://docs.spring.io/spring-framework/reference/web/websocket/server.html#websocket-server-handshake)
+
+- 스프링부트 웹소켓2 [link](https://velog.io/@yyong3519/스프링부트-웹소켓2)
   
 # github
 - Spring WebSocket 소개 github [link](https://supawer0728.github.io/2018/03/30/spring-websocket/)
