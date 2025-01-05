@@ -1,4 +1,5 @@
 # 한글 입력 uim
+```shell
 export XIM=uim
 export XMODIFIERS=@im=uim
 export UIM_CANDWIN_PROG=uim-candwin-gtk
@@ -9,6 +10,9 @@ if [ $SHLVL -eq 1 ]; then
   uim-xim &
 fi
 # uim-pref-gtk
+```
 
 # ll
+```shell
 alias ll='ls -als'
+```
